@@ -17,7 +17,6 @@ class MyDecorator(object):
   def __call__(self, obj, *args, **kwargs):
     response = self.func(obj, *args, **kwargs)
     text = response.text
-    
     response_dict = {}
     start = 0
     for i, char in enumerate(text):
@@ -99,9 +98,14 @@ class Hexonet(object):
       return requests.get(cls.API, params=params)
     
     @classmethod
-    def delete_domain(cls):
-      """ """
-
+    @convert_response_to_dict
+    def delete_domain(cls, domain):
+      """ Deletes domain based on url """
+      params = cls.PARAMS.copy()
+      params['command'] = 'DeleteDomain'
+      params['domain'] = domain
+      return requests.get(cls.API, params=params)
+    
     @classmethod
     def status_domain(cls):
       """ """
@@ -142,4 +146,46 @@ class Hexonet(object):
       params['domain'] = domain
       return requests.get(cls.API, params=params)
     
+    
+    @classmethod
+    @convert_response_to_dict
+    def transfer_domain(cls, domain, auth, action):
+      """ Transfer a domain. Action commands are one of the following:
+          - REQUEST; request transfer
+          - APPROVE; approve outgoing transfer
+          - DENY; deny outgoing transfer
+          - CANCEL; cancel incoming transfer request
+          - USERTRANSFER; request local transfer within hexonet
+      """
+      params = cls.PARAMS.copy()
+      params['command'] = 'TransferDomain'
+      params['domain'] = domain
+      params['auth'] = auth
+      params['action'] = action
+      return requests.get(cls.API, params=params)
+    
+    
+    @classmethod
+    @convert_response_to_dict
+    def list_transfers_incoming(cls):
+      """ Returns list of incoming domain transfers and their current status """
+      params = cls.PARAMS.copy()
+      params['command'] = 'QueryTransferList'
+      return requests.get(cls.API, params=params)
+    
+    @classmethod
+    @convert_response_to_dict
+    def list_transfers_outgoing(cls):
+      """ Returns dict with incoming domain transfers and their current status """
+      params = cls.PARAMS.copy()
+      params['command'] = 'QueryForeignTransferList'
+      return requests.get(cls.API, params=params)
+    
+    @classmethod
+    @convert_response_to_dict
+    def list_owned_servers(cls):
+      """ Returns dict with list of owned servers """
+      params = cls.PARAMS.copy()
+      params['command'] = 'QueryDomainList'
+      return requests.get(cls.API, params=params)
     
