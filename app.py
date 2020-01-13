@@ -18,7 +18,7 @@ auth = 'Wb29L-dfGi4b'
 # pp.pprint(hexonet.transfer_domain(domain, auth=auth, action='usertransfer'))
 # pp.pprint(hexonet.transfer_domain(domain, action='approve'))
 
-pp.pprint(hexonet.list_transfers_incoming())
-pp.pprint(hexonet.list_transfers_outgoing())
-# pp.pprint(hexonet.list_owned_servers())
+# pp.pprint(hexonet.list_transfers_incoming())
+# pp.pprint(hexonet.list_transfers_outgoing())
+# pp.pprint(hexonet.query_domain_list())
 # pp.pprint(hexonet.unlock_domain_for_transfer('stef1.co', 0))

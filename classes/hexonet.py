@@ -254,6 +254,7 @@ class Hexonet(object):
       params = cls.PARAMS.copy()
       params['command'] = 'DeleteDomain'
       params['domain'] = domain
+      
       return requests.get(cls.API, params=params)
     
     @classmethod
@@ -263,12 +264,14 @@ class Hexonet(object):
       params = cls.PARAMS.copy()
       params['command'] = 'ModifyDomain'
       params['domain'] = domain
+      
       return requests.get(cls.API, params=params)
     
     @classmethod
     @convert_response_to_dict
     def pay_domain_renewal(cls, domain, period=None):
       """
+      period as an integer
       The PayDomainRenewal command is used to pay the renewal of a single domain. 
       It sets the PAIDUNTILDATE of a domain according to the given renewal period.
       If a domain has been paid (as given by PAIDUNTILDATE) it will be renewed automatically when registry's EXPIREDATE is reached.
@@ -276,31 +279,152 @@ class Hexonet(object):
       params = cls.PARAMS.copy()
       params['command'] = 'PayDomainRenewal'
       params['domain'] = domain
+      
       if period is not None:
         params['period'] = period
+        
+      return requests.get(cls.API, params=params)
+    
+    @classmethod
+    @convert_response_to_dict
+    def push_domain(cls, domain, target):
+      """
+      The PushDomain command is used to send .DE / .AT domains to transit / billwithdraw status 
+      and change the tag or delete a .UK domain.
+      """
+      params = cls.PARAMS.copy()
+      params['command'] = 'PushDomain'
+      params['domain'] = domain
+      params['target'] = target
+      
+      return requests.get(cls.API, params=params)
+
+    @classmethod
+    @convert_response_to_dict
+    def renew_domain(cls, domain, period=None, expiration=None):
+      """
+      The PushDomain command is used to send .DE / .AT domains to transit / billwithdraw status 
+      and change the tag or delete a .UK domain.
+      """
+      params = cls.PARAMS.copy()
+      params['command'] = 'RenewDomain'
+      params['domain'] = domain
+      
+      if period is not None:
+        params['period'] = period
+        
+      if expiration is not None:
+        params['expiration'] = expiration
+      
+      return requests.get(cls.API, params=params)
+    
+    @classmethod
+    @convert_response_to_dict
+    def restore_domain(cls, domain):
+      """
+      The RestoreDomain command automatically request a restore at the respective registry.
+      The processing depends on the respective TLD/ccTLD / registry and varies from realtime up to 3 working days.
+      """
+      params = cls.PARAMS.copy()
+      params['command'] = 'RestoreDomain'
+      params['domain'] = domain
+   
+      return requests.get(cls.API, params=params)
+
+    @classmethod
+    @convert_response_to_dict
+    def restore_domain(cls, domain, renewalmode, period):
+      """
+      renewalmode = AUTORENEW | AUTOEXPIRE | AUTODELETE
+      period = 1Y | 1M
+
+      SetDomainRenewalMode allows you to set the renewalmode on a per domain basis; the following modes are permitted:
+      - AUTORENEW: the system pays the domain renewal internally if the domain has renewalmode 
+                   AUTORENEW. Hence the PREPAIDPERIOD is increased.
+      - AUTODELETE: the system will send a deletion command for the domain name on failure date
+      - AUTOEXPIRE: the system let the domain expire on the so-called failure date, 
+                    often this is equal to a deletion, but for some TLDs like .DE, another procedure apply (.de: "TRANSIT"; .at: "BILLWITHDRAW")
+
+      With the optional parameter PERIOD you are able to set a .DE domain name to monthly renewal or back to yearly.
+      """
+      params = cls.PARAMS.copy()
+      params['command'] = 'SetDomainRenewalMode'
+      params['domain'] = domain
+      params['renewalmode'] = renewalmode
+      params['period'] = period
+   
       return requests.get(cls.API, params=params)
 
     @classmethod
     @convert_response_to_dict
     def status_domain(cls, domain):
-      """ """
+      """
+      The StatusDomain command enables you to check the current status of a domain name. 
+      It gives information about the created date, expiration, renewal mode, transfer-lock, etc. 
+      """
       params = cls.PARAMS.copy()
       params['command'] = 'StatusDomain'
       params['domain'] = domain
+      
       return requests.get(cls.API, params=params)
     
+    @classmethod
+    @convert_response_to_dict
+    def status_domain_av_record(cls, domain):
+      """
+      The StatusDomainAvRecord command is used to check the current status of a Authentication and Verification (A/V) Data record.
+      A/V records are only required for the .PRO registry at the moment. 
+      """
+      params = cls.PARAMS.copy()
+      params['command'] = 'StatusDomainAvRecord'
+      params['domain'] = domain
+      
+      return requests.get(cls.API, params=params)
+    
+    
+    @classmethod
+    @convert_response_to_dict
+    def status_domain_transfer(cls, domain):
+      """
+      The StatusDomainTransfer command informs you about the current status of a transfer. 
+      You can check if the transfer was successfully initiated or who received the eMail to confirm a transfer. 
+      This command works currently only with COM / NET / ORG / INFO & BIZ domains.
+      """
+      params = cls.PARAMS.copy()
+      params['command'] = 'StatusDomainTransfer'
+      params['domain'] = domain
+      
+      return requests.get(cls.API, params=params)
+    
+    @classmethod
+    @convert_response_to_dict
+    def trade_domain(cls, domain, contact, action):
+      """
+      TODO Check if the ownercontact requires the Customer object
+      action = request | cancel 
+      It is not possible to change the owner name or company name of a: 
+      .AT, .BE, .CH, .EU, .ES, .FR, .IT, .JP, .LI, .LU, .NL, .NU, .SE or .SG domain through the ModifyDomain command. 
+      In such a case you have to request a so-called "trade" and state the new owner contact. 
+      Please have a look at the  Domain API-Manual for a current list of allowed parameters.
+      """
+      params = cls.PARAMS.copy()
+      params['command'] = 'TradeDomain'
+      params['domain'] = domain
+      
+      return requests.get(cls.API, params=params)
     
     @classmethod
     @convert_response_to_dict
     def transfer_domain(cls, domain, auth=None, 
                         action=None, transferlock=None
                         ):
-      """ Transfer a domain. Action commands are one of the following:
-          - REQUEST; request transfer
-          - APPROVE; approve outgoing transfer
-          - DENY; deny outgoing transfer
-          - CANCEL; cancel incoming transfer request
-          - USERTRANSFER; request local transfer within hexonet
+      """ 
+      Transfer a domain. Action commands are one of the following:
+        - REQUEST; request transfer
+        - APPROVE; approve outgoing transfer
+        - DENY; deny outgoing transfer
+        - CANCEL; cancel incoming transfer request
+        - USERTRANSFER; request local transfer within hexonet
       """
       params = cls.PARAMS.copy()
       params['command'] = 'TransferDomain'
@@ -318,6 +442,79 @@ class Hexonet(object):
     
     @classmethod
     @convert_response_to_dict
+    def query_domain_list(cls, admincontact=None, billingcontact=None,
+                          domain=None, first=None, limit=None,
+                          maxcreatedate=None, maxregistrationexpirationdate=None, maxupdateddate=None,
+                          mincreateddate=None, minregistrationexpirationdate=None, minupdateddate=None,
+                          nameserver=None, orderby=None, ownercontact=None,
+                          status=None, techcontact=None, transferlock=None,
+                          userdepth=None, x_trustee=None, zone=None
+                          ):
+      """ 
+      The command QueryDomainList will return you a list of domain names managed by your HEXONET account. 
+      With it's different parameters it enables you to filter the list of results depending on your needs
+      
+      admincontact = (CONTACT)
+      billingcontact = (CONTACT)
+      domain = (DOMAIN)
+      first = (INT)
+      limit = (INT)
+      maxcreateddate = (DATE)
+      maxregistrationexpirationdate = (DATE)
+      maxupdateddate = (DATE)
+      mincreateddate = (DATE)
+      minregistrationexpirationdate = (DATE)
+      minupdateddate = (DATE)
+      nameserver = (NAMESERVER)
+      nameserver# = (NAMESERVER)
+      orderby = DOMAIN | DOMAINDESC | USER | USERDESC | CREATEDDATE | CREATEDDATEDESC | UPDATEDDATE | UPDATEDDATEDESC | 
+      REGISTRATIONEXPIRATIONDATE | REGISTRATIONEXPIRATIONDATEDESC | REGISTRAR | REGISTRARDESC
+      ownercontact = (CONTACT)
+      status = (STATUS)
+      techcontact = (CONTACT)
+      transferlock = 0 | 1
+      userdepth = SELF | SUBUSER | ALL
+      x-trustee = 0 | 1
+      zone = (ZONE)
+      """
+      params = cls.PARAMS.copy()
+      params['command'] = 'QueryDomainList'
+      params['admincontact'] = admincontact
+      params['billingcontact'] = billingcontact
+      params['domain'] = domain
+      params['first'] = first
+      params['maxcreatedate'] = maxcreatedate
+      params['maxregistrationexpirationdate'] = maxregistrationexpirationdate
+      params['maxupdateddate'] = maxupdateddate
+      params['mincreateddate'] = mincreateddate
+      params['minregistrationexpirationdate'] = minregistrationexpirationdate
+      params['minupdateddate'] = minupdateddate
+      params['nameserver'] = nameserver
+      params['orderby'] = orderby
+      params['ownercontact'] = ownercontact
+      params['status'] = status
+      params['techcontact'] = techcontact
+      params['transferlock'] = transferlock
+      params['userdepth'] = userdepth
+      params['x-trustee'] = x_trustee
+      params['zone'] = zone
+
+      return requests.get(cls.API, params=params)
+    
+    @classmethod
+    @convert_response_to_dict
+    def query_domain_repository_info(cls, domain, repository, zone):
+      """ The QueryDomainRepositoryInfo command is used to list all available information for a certain domain repository. """
+      params = cls.PARAMS.copy()
+      params['command'] = 'QueryDomainRepositoryInfo'
+      params['domain'] = domain
+      params['repository'] = repository
+      params['zone'] = zone
+      
+      return requests.get(cls.API, params=params)
+    
+    @classmethod
+    @convert_response_to_dict
     def list_transfers_incoming(cls):
       """ Returns list of incoming domain transfers and their current status """
       params = cls.PARAMS.copy()
@@ -330,14 +527,7 @@ class Hexonet(object):
       """ Returns dict with incoming domain transfers and their current status """
       params = cls.PARAMS.copy()
       params['command'] = 'QueryForeignTransferList'
-      return requests.get(cls.API, params=params)
-    
-    @classmethod
-    @convert_response_to_dict
-    def list_owned_servers(cls):
-      """ Returns dict with list of owned servers """
-      params = cls.PARAMS.copy()
-      params['command'] = 'QueryDomainList'
+      
       return requests.get(cls.API, params=params)
     
     @classmethod
@@ -348,4 +538,5 @@ class Hexonet(object):
       params['domain'] = domain
       params['command'] = 'ModifyDomain'
       params['transferlock'] = shouldLock
+      
       return requests.get(cls.API, params=params)
