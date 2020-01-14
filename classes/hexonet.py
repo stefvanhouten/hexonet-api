@@ -333,7 +333,7 @@ class Hexonet(object):
 
     @classmethod
     @convert_response_to_dict
-    def restore_domain(cls, domain, renewalmode, period):
+    def renew_domain(cls, domain, renewalmode, period):
       """
       renewalmode = AUTORENEW | AUTOEXPIRE | AUTODELETE
       period = 1Y | 1M
@@ -367,6 +367,16 @@ class Hexonet(object):
       params['domain'] = domain
       
       return requests.get(cls.API, params=params)
+    
+    @classmethod
+    def get_domain_auth_key(cls, domain):
+      """ Returns auth key used to transfer specific domain """
+      result = cls.status_domain(domain)
+      
+      if 'PROPERTY[AUTH][0]' in result:
+        return result['PROPERTY[AUTH][0]']
+      else:
+        return None
     
     @classmethod
     @convert_response_to_dict
@@ -524,7 +534,7 @@ class Hexonet(object):
     @classmethod
     @convert_response_to_dict
     def list_transfers_outgoing(cls):
-      """ Returns dict with incoming domain transfers and their current status """
+      """ Returns dict with incoming domain transfers and their current status. """
       params = cls.PARAMS.copy()
       params['command'] = 'QueryForeignTransferList'
       
@@ -533,7 +543,7 @@ class Hexonet(object):
     @classmethod
     @convert_response_to_dict
     def unlock_domain_for_transfer(cls, domain, shouldLock):
-      """ Takes integer 0 to unlock 1 to lock """
+      """ Takes integer 0 to unlock and 1 to lock. """
       params = cls.PARAMS.copy()
       params['domain'] = domain
       params['command'] = 'ModifyDomain'
