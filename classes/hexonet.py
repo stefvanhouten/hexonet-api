@@ -23,7 +23,7 @@ class MyDecorator(object):
     start = 0
     for i, char in enumerate(text):
       if char == "\n":
-        line = text[start:i].split("=")
+        line = text[start:i].split("=", 1)
         if len(line) >= 2 and line[1] != "":
           key, value = line
           if key in response_dict.keys():
@@ -31,7 +31,6 @@ class MyDecorator(object):
           response_dict[key] = value
         start = i + 1
 
-    response_dict['status'] = response.status_code
     return response_dict
 
 convert_response_to_dict = MyDecorator
@@ -59,7 +58,7 @@ class Customer(object):
         self.title = title
 
 class Hexonet(object):
-    LOGIN = "stefvanhouten"
+    LOGIN = "stefvanhouten1"
     PW = "e@K!LfR7kcPa6a9"
 
     API = "https://api.ispapi.net/api/call.cgi"
@@ -259,11 +258,37 @@ class Hexonet(object):
     
     @classmethod
     @convert_response_to_dict
-    def modify_domain(cls, domain):
-      """ TODO find out what are the most important commands for modifying and workout this function """
+    def modify_domain(cls, domain, options):
+      """ 
+      TODO: find out what are the most important commands for modifying and workout this function
+      All options keywords: 
+      options = {
+        'addnameserver0': 'value',
+        'delnameserver0': 'value',
+        'nameserver0': 'value',
+        'addownercontact0': 'value',
+        'delownercontact0': 'value',
+        'ownercontact0': 'value',
+        'addadmincontact0': 'value',
+        'deladmincontact0': 'value',
+        'admincontact0': 'value',
+        'addtechcontact0': 'value',
+        'deltechcontact0': 'value',
+        'techcontact0': 'value',
+        'addbillingcontact0': 'value',
+        'delbillingcontact0': 'value',
+        'billingcontact0': 'value',
+        'addstatus0': 'value',
+        'delstatus0': 'value',
+        'status0': 'value',
+      } 
+      """
       params = cls.PARAMS.copy()
       params['command'] = 'ModifyDomain'
       params['domain'] = domain
+      
+      for value in options:
+        params[value] = options[value]
       
       return requests.get(cls.API, params=params)
     
@@ -374,7 +399,7 @@ class Hexonet(object):
       result = cls.status_domain(domain)
       
       if 'PROPERTY[AUTH][0]' in result:
-        return result['PROPERTY[AUTH][0]']
+        return { "key": result['PROPERTY[AUTH][0]'] }
       else:
         return None
     

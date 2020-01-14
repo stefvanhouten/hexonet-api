@@ -16,4 +16,13 @@ class Sidn(object):
   def check_domain(cls, domain):
     response = requests.get(cls.API, params={'domain': domain}, cookies=cls.api_token)
     return response.json()
-    
+  
+  @classmethod
+  def test(cls):
+    xml = """ 
+          <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+          <epp xmlns="urn:ietf:params:xml:ns:epp-1.0">
+            <hello />
+          </epp>
+          """
+    print(requests.post("drs.domain-registry.nl:700", data=xml))

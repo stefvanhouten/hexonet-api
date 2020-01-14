@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<epp xmlns="urn:ietf:params:xml:ns:epp-1.0"><response><result code="2200"><msg>Authentication error</msg></result><trID><clTRID>300100</clTRID><svTRID>SIDN</svTRID></trID></response></epp>
