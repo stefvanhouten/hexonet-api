@@ -9,7 +9,7 @@ HOST, PORT = 'testdrs.domain-REGISTRY.nl', 700
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.settimeout(3)
 
-wrappedSocket = ssl.wrap_socket(sock)
+wrappedSocket = ssl.wrap_socket(sock, keyfile='key.pem', certfile='certificate.pem')
 
 # CONNECT AND PRINT REPLY
 wrappedSocket.connect((HOST, PORT))

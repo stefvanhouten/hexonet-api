@@ -1,9 +1,8 @@
-
+from functools import partial, update_wrapper
+import json
 import requests
-from functools import update_wrapper, partial
-import pprint
+import brotli
 
-pp = pprint.PrettyPrinter(indent=4)
 
 class MyDecorator(object):
   def __init__(self, func):
@@ -474,7 +473,26 @@ class Hexonet(object):
         
       return requests.get(cls.API, params=params)
     
-    
+    @classmethod
+    def get_tld_eu(cls):
+      headers = {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Accept': '*/*',
+          'Accept-Encoding': 'gzip, deflate, br',
+      }
+      data = '{"location":"world"}'
+      response = requests.post('https://www.hexonet.net/pricing', headers=headers, data=data)
+      response = brotli.decompress(response.content).decode('utf-8')
+      response = json.loads(response)
+      d = {}
+      for domain in response['data']:
+        for price in domain:
+          if "EUR" in price:
+            d[domain[0].strip(' ')] = price
+            break
+      return d
+      
+      
     @classmethod
     @convert_response_to_dict
     def query_domain_list(cls, admincontact=None, billingcontact=None,

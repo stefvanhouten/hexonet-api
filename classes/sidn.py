@@ -1,6 +1,8 @@
 
-import requests
 import pprint
+
+import requests
+
 
 class Sidn(object):
   API = 'https://api.sidn.nl/rest/is?'
